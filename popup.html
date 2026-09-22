@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>FormFlash</title>
+  <link rel="stylesheet" href="popup.css"/>
+</head>
+<body>
+<div class="shell">
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo-wrap">⚡</div>
+      <div>
+        <div class="brand-name">FormFlash</div>
+        <div class="brand-tag">autofill</div>
+      </div>
+    </div>
+    <span id="tab-badge" class="badge badge--off">no form</span>
+  </header>
+
+  <section class="fill-zone">
+    <button id="fill" class="fill-btn" disabled>
+      <span class="fill-icon">▶</span>
+      Fill this form
+    </button>
+    <p id="result" class="result-msg" role="status" aria-live="polite"></p>
+  </section>
+
+  <section id="needs" class="panel" hidden>
+    <div class="panel-head">
+      <span class="panel-title">Needs your answer</span>
+      <span id="needs-count" class="chip">0</span>
+    </div>
+    <p class="panel-sub">Save once — auto-fills next time.</p>
+    <ul id="needsList" class="needs-list"></ul>
+  </section>
+
+  <div class="tabs" role="tablist">
+    <button class="tab active" role="tab" data-tab="answers" aria-selected="true">Saved answers</button>
+    <button class="tab" role="tab" data-tab="settings" aria-selected="false">Settings</button>
+  </div>
+
+  <div id="tab-answers" class="tab-body">
+    <div class="search-row">
+      <span class="search-icon">⌕</span>
+      <input id="search" type="text" class="search-input" placeholder="filter answers…" aria-label="Filter answers"/>
+      <button id="add" class="icon-btn" title="Add answer" aria-label="Add answer">＋</button>
+    </div>
+    <ul id="rows" class="ans-list"></ul>
+    <p class="hint-text">
+      keywords: comma-separated · <code>=name</code> = exact match · checkbox answers: <code>Java, Python</code>
+    </p>
+  </div>
+
+  <div id="tab-settings" class="tab-body hidden">
+    <div class="settings-group">
+      <p class="settings-label">data</p>
+      <button id="export" class="setting-btn">
+        <span class="s-icon">↑</span> Export answers
+      </button>
+      <button id="import" class="setting-btn">
+        <span class="s-icon">↓</span> Import answers
+      </button>
+      <input id="file" type="file" accept="application/json" hidden/>
+    </div>
+    <div class="settings-group">
+      <p class="settings-label">danger</p>
+      <button id="clear-all" class="setting-btn danger">
+        <span class="s-icon">✕</span> Clear all answers
+      </button>
+    </div>
+    <p class="version-text">v1.0 · data stays in your browser</p>
+  </div>
+
+</div>
+<script src="popup.js"></script>
+</body>
+</html>
