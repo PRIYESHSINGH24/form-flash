@@ -10,71 +10,94 @@
 <div class="shell">
 
   <header class="topbar">
-    <div class="brand">
-      <div class="logo-wrap">⚡</div>
-      <div>
-        <div class="brand-name">FormFlash</div>
-        <div class="brand-tag">autofill</div>
-      </div>
-    </div>
-    <span id="tab-badge" class="badge badge--off">no form</span>
+    <span class="wordmark">FormFlash</span>
+    <span id="tab-badge" class="status">
+      <span class="status-dot" aria-hidden="true"></span>
+      <span id="tab-badge-text">checking</span>
+    </span>
   </header>
 
   <section class="fill-zone">
-    <button id="fill" class="fill-btn" disabled>
-      <span class="fill-icon">▶</span>
-      Fill this form
+    <button id="fill" class="btn-primary" disabled>
+      <span class="fill-label">Fill this form</span>
     </button>
-    <p id="result" class="result-msg" role="status" aria-live="polite"></p>
+    <p id="result" class="result" role="status" aria-live="polite"></p>
   </section>
 
-  <section id="needs" class="panel" hidden>
-    <div class="panel-head">
-      <span class="panel-title">Needs your answer</span>
-      <span id="needs-count" class="chip">0</span>
+  <section id="scan" class="scan" hidden>
+    <div class="scan-head">
+      <div>
+        <span class="scan-title">Detected questions</span>
+        <span id="scan-count" class="scan-count">0 of 0 answered</span>
+      </div>
+      <button id="refresh" class="icon-btn" title="Scan the page again" aria-label="Scan the page again">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.35-5.65"/><path d="M20 4v4h-4"/></svg>
+      </button>
     </div>
-    <p class="panel-sub">Save once — auto-fills next time.</p>
-    <ul id="needsList" class="needs-list"></ul>
+    <div class="bar"><div id="bar-fill" class="bar-fill"></div></div>
+    <ul id="questionList" class="q-list"></ul>
   </section>
 
-  <div class="tabs" role="tablist">
-    <button class="tab active" role="tab" data-tab="answers" aria-selected="true">Saved answers</button>
+  <nav class="tabs" role="tablist">
+    <button class="tab active" role="tab" data-tab="answers" aria-selected="true">Answers</button>
     <button class="tab" role="tab" data-tab="settings" aria-selected="false">Settings</button>
-  </div>
+  </nav>
 
   <div id="tab-answers" class="tab-body">
-    <div class="search-row">
-      <span class="search-icon">⌕</span>
-      <input id="search" type="text" class="search-input" placeholder="filter answers…" aria-label="Filter answers"/>
-      <button id="add" class="icon-btn" title="Add answer" aria-label="Add answer">＋</button>
+    <div class="search-wrap">
+      <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg>
+      <input id="search" type="text" class="search-input" placeholder="Search answers" aria-label="Search answers"/>
+      <button id="add" class="icon-btn" title="Add an answer" aria-label="Add an answer">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
     </div>
-    <ul id="rows" class="ans-list"></ul>
-    <p class="hint-text">
-      keywords: comma-separated · <code>=name</code> = exact match · checkbox answers: <code>Java, Python</code>
+    <ul id="rows" class="rows"></ul>
+    <p class="hint">
+      Keywords are matched against the question text. Prefix a keyword with <code>=</code> for an
+      exact match. Separate checkbox answers with commas.
     </p>
   </div>
 
   <div id="tab-settings" class="tab-body hidden">
-    <div class="settings-group">
-      <p class="settings-label">data</p>
-      <button id="export" class="setting-btn">
-        <span class="s-icon">↑</span> Export answers
+    <p class="section-label">Filling</p>
+    <label class="switch-row">
+      <input type="checkbox" id="auto-fill"/>
+      <span class="switch" aria-hidden="true"></span>
+      <span>Fill new sections while I go through a multi-page form</span>
+    </label>
+    <label class="switch-row">
+      <input type="checkbox" id="show-button"/>
+      <span class="switch" aria-hidden="true"></span>
+      <span>Show the fill button on form pages</span>
+    </label>
+    <p class="note">Shortcut: <kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>F</kbd></p>
+
+    <p class="section-label">Import and export</p>
+    <div class="list">
+      <button id="export" class="list-row">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="m7.5 10.5 4.5 4.5 4.5-4.5"/><path d="M4 20h16"/></svg>
+        Export answers to a file
       </button>
-      <button id="import" class="setting-btn">
-        <span class="s-icon">↓</span> Import answers
+      <button id="import" class="list-row">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20V9"/><path d="m7.5 13.5 4.5-4.5 4.5 4.5"/><path d="M4 4h16"/></svg>
+        Import answers from a file
       </button>
       <input id="file" type="file" accept="application/json" hidden/>
     </div>
-    <div class="settings-group">
-      <p class="settings-label">danger</p>
-      <button id="clear-all" class="setting-btn danger">
-        <span class="s-icon">✕</span> Clear all answers
+
+    <p class="section-label">Reset</p>
+    <div class="list">
+      <button id="clear-all" class="list-row list-row--danger">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V5h6v2"/><path d="M6.5 7 8 20h8l1.5-13"/></svg>
+        Delete all saved answers
       </button>
     </div>
-    <p class="version-text">v1.0 · data stays in your browser</p>
+
+    <p class="version">v1.2. Answers are stored in this browser profile.</p>
   </div>
 
 </div>
+<script src="lib/matcher.js"></script>
 <script src="popup.js"></script>
 </body>
 </html>

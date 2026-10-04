@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>FormFlash popup preview</title>
+  <style>
+    body { margin: 0; background: #dfe1e5; display: grid; place-items: start center; min-height: 100vh; }
+  </style>
+</head>
+<body>
+<script>
+/* Dev-only harness: loads the real popup.html with a stub chrome object so the
+   popup can be viewed in a normal tab. Not part of the extension. */
+(async () => {
+  const html = await fetch('../popup.html').then((r) => r.text());
+
+  const stub = `<script>
+    const seed = {
+      entries: [
+        { keys: ['=name', 'full name'], value: 'Ada Lovelace' },
+        { keys: ['email', 'e mail'], value: 'ada@example.com' },
+        { keys: ['phone'], value: '9876543210' },
+        { keys: ['communication'], value: 'Strongly agree' },
+      ],
+      settings: { autoFill: true, showButton: true },
+      questions: [
+        { label: 'Full name', type: 'text', options: [], answer: 'Ada Lovelace', filled: false },
+        { label: 'Email address', type: 'text', options: [], answer: 'ada@example.com', filled: true },
+        { label: 'Roll number', type: 'text', options: [], answer: null, filled: false },
+        { label: 'Preferred branch', type: 'select', options: ['CSE', 'ECE', 'Mech'], answer: null, filled: false },
+        { label: 'Communication', type: 'radio', options: ['Strongly agree', 'Agree', 'Neutral'], answer: 'Strongly agree', filled: false },
+        { label: 'Date of birth', type: 'text', options: [], answer: null, filled: false },
+      ],
+    };
+    window.confirm = () => true;
+    window.chrome = {
+      storage: {
+        local: {
+          get: async (key) => ({ [key]: seed[key] }),
+          set: async (patch) => Object.assign(seed, patch),
+        },
+        onChanged: { addListener() {} },
+      },
+      tabs: {
+        query: async () => [{
+          id: 1,
+          url: 'https://docs.google.com/forms/d/e/1FAIpQLSc/viewform',
+        }],
+        sendMessage: async (tabId, msg) => {
+          if (msg.type === 'FORMFLASH_PING') return { ok: true, onForm: true };
+          if (msg.type === 'FORMFLASH_SCAN') return { ok: true, questions: seed.questions };
+          if (msg.type === 'FORMFLASH_FILL_ONE') return { ok: true, filled: true };
+          if (msg.type === 'FORMFLASH_FILL') {
+            seed.questions.forEach((q) => { if (q.answer != null) q.filled = true; });
+            return { ok: true, report: { filled: 3, total: 6, unmatched: [], filledLabels: [] } };
+          }
+          return { ok: false };
+        },
+      },
+      scripting: { executeScript: async () => [] },
+    };
+  <\/script>`;
+
+  const withBase = html.replace('<head>', '<head><base href="../"/>' + stub);
+  document.open();
+  document.write(withBase);
+  document.close();
+})();
+</script>
+</body>
+</html>

@@ -1,9 +1,18 @@
 {
   "manifest_version": 3,
   "name": "FormFlash - One-click Form Autofill",
-  "version": "1.0.0",
-  "description": "Fill Google Forms and Microsoft Forms in one click from answers you saved once. Add your own questions too. Everything stays in your browser.",
+  "version": "1.2.0",
+  "description": "Fills Google Forms and Microsoft Forms from answers you save once. Everything stays in your browser.",
   "permissions": ["storage", "activeTab", "scripting"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "commands": {
+    "fill-form": {
+      "suggested_key": { "default": "Alt+Shift+F" },
+      "description": "Fill the current form"
+    }
+  },
   "action": {
     "default_title": "FormFlash",
     "default_popup": "popup.html",
@@ -25,7 +34,7 @@
         "https://forms.microsoft.com/*",
         "https://forms.cloud.microsoft/*"
       ],
-      "js": ["content.js"],
+      "js": ["lib/matcher.js", "content.js"],
       "run_at": "document_idle"
     }
   ]

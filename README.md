@@ -1,535 +1,126 @@
 # FormFlash
 
-> **One-click autofill for Google Forms & Microsoft Forms — local-first, privacy-friendly, customizable, and open source.**
+A Chrome extension that fills Google Forms and Microsoft Forms using answers you save once.
+Answers live in `chrome.storage.local`, nothing is sent anywhere, and the extension never
+submits a form for you.
 
-FormFlash is a browser extension that lets you save your commonly used answers once and reuse them across supported forms with a single click.
+## Install
 
-Your saved answers stay in your browser using `chrome.storage.local`. FormFlash does not require an account or a FormFlash backend, and it **never submits a form automatically**.
+1. Clone or download this folder.
+2. Open `chrome://extensions` and turn on Developer mode.
+3. Click "Load unpacked" and pick this folder (the one with `manifest.json`).
+4. Pin the extension so the icon stays in the toolbar.
 
----
+After editing any file, hit Reload on the extension card and refresh the form page.
 
-## Features
+## Using it
 
-- **One-click autofill** for supported Google Forms and Microsoft Forms
-- **Local-first storage** using `chrome.storage.local`
-- **Custom question mappings** — teach FormFlash new questions as you encounter them
-- **Keyword-based matching** so one saved answer can work across similar question wording
-- **Exact matching** with `=keyword` for cases where precision matters
-- **Text inputs, radio buttons, checkboxes, and dropdown-style controls** where supported by the current provider implementation
-- **Unmatched question detection** so you can quickly add missing answers
-- **Import / export** of your saved answers
-- **Does not overwrite existing filled fields**
-- **No automatic form submission**
-- **No FormFlash backend required**
+Open a Google or Microsoft form and click the FormFlash icon in the toolbar, or the
+"Fill form" button the extension puts in the bottom right corner of the page.
 
----
+- Fields you already filled in are left alone.
+- Nothing is submitted. Check the answers and submit the form yourself.
+- Filled fields are outlined in orange for a moment so you can find them quickly.
 
-## Privacy by Design
+### Detected questions
 
-FormFlash is designed around a simple principle:
+As soon as the popup opens on a form, it scans the page and lists every question it can
+fill, whether or not you have an answer for it:
 
-> **Your saved answers should stay on your device unless you choose to submit them to a third-party form.**
+- `saved` means a saved answer matches the question.
+- `filled` means the field already has a value on the page.
+- `missing` means there is nothing to fill it with yet.
 
-FormFlash currently stores answer mappings in the browser through `chrome.storage.local` and does not require a FormFlash account or cloud database.
+Missing questions get an input box, or a dropdown built from the form's own choices, plus a
+Save button. Saving records that answer so the next form with the same question fills
+itself. Questions that are already saved get their own Fill button, so you can fill one
+question without running a full fill. The scan button in the panel header re-reads the page
+if the form was still loading.
 
-### What FormFlash does
+Keyboard shortcut: `Alt+Shift+F`. Change it at `chrome://extensions/shortcuts`.
 
-```text
-You save an answer
-       ↓
-chrome.storage.local
-       ↓
-You open a supported form
-       ↓
-FormFlash finds matching questions
-       ↓
-You click “Fill form”
-       ↓
-Fields are populated locally in the page
-```
+The popup follows your system light or dark setting.
 
-### Important
+## Saving answers
 
-Local storage does **not** mean encryption or password-manager-level protection.
+The Answers tab has one row per answer: keywords on the left, the answer on the right.
+Keywords are matched against the question text, so `email` covers "Email", "Email address"
+and "College email". The longest matching keyword wins.
 
-Also, when you submit a completed form, the form provider (for example, Google or Microsoft) can receive whatever information you submit through that form. FormFlash does not control the privacy practices of those third-party services.
+Prefix a keyword with `=` to require the whole question to match:
 
----
+- `name` matches "Name", "Father's name" and "Full name"
+- `=name` only matches "Name"
 
-## Supported Forms
+A few more notes:
 
-FormFlash currently targets:
+- Checkbox answers go in as a comma separated list, e.g. `Java, Python`.
+- Grid questions ("rate each of these") are matched row by row, so a keyword like
+  `communication` can answer just the Communication row.
+- Date, time and number answers are converted to what the input expects. `31/12/2026`,
+  `October 4, 2026` and `2026-12-31` all work in a date field, and `9:30 am` works in a
+  time field.
 
-| Provider | Status |
-|---|---|
-| Google Forms | Supported |
-| Microsoft Forms | Supported |
+## Settings
 
-The extension currently matches these domains through its Manifest V3 content-script configuration:
+Both toggles are on by default.
 
-- `docs.google.com/forms/*`
-- `forms.office.com/*`
-- `forms.microsoft.com/*`
-- `forms.cloud.microsoft/*`
+- "Keep filling as I move through sections" fills each new section of a multi-page form
+  after you have filled the form once yourself.
+- "Show the fill button on form pages" can be turned off if you prefer the toolbar popup
+  or the shortcut.
 
-> Form providers can change their page structure over time. If a control stops working, please open an issue with a minimal reproducible example or sanitized DOM details.
+Export and import write a JSON file you can move between browsers. "Delete all saved
+answers" clears everything.
 
----
+## What it fills
 
-## Installation
+Text and paragraph boxes, radio buttons, checkboxes, dropdowns (native and ARIA), date,
+time and number inputs, contenteditable answer boxes, and multiple choice and checkbox
+grids. File uploads and image questions are skipped.
 
-FormFlash can currently be installed locally as an unpacked Chrome extension.
+Google and Microsoft change their markup from time to time. If something stops working,
+open an issue with the provider, the question type and what happened.
 
-### 1. Download the repository
+## Privacy
 
-```bash
-git clone https://github.com/<your-username>/formflash.git
-cd formflash
-```
-
-### 2. Open Chrome extensions
-
-Go to:
-
-```text
-chrome://extensions
-```
-
-Turn on **Developer mode**.
-
-### 3. Load FormFlash
-
-Click **Load unpacked** and select the project directory containing `manifest.json`.
-
-### 4. Pin the extension
-
-Open the Chrome extensions menu and pin **FormFlash** for quick access.
-
----
-
-## How to Use
-
-### Step 1 — Save your answers
-
-Open the FormFlash popup and add reusable mappings such as:
-
-```text
-Keyword: email
-Answer: priyesh@example.com
-```
-
-```text
-Keyword: phone
-Answer: 9876543210
-```
-
-```text
-Keyword: college
-Answer: Bennett University
-```
-
-Answers are auto-saved locally in the browser.
-
-### Step 2 — Open a supported form
-
-Open a Google Form or Microsoft Form supported by the current implementation.
-
-FormFlash provides a **Fill form** action through the extension UI and, where supported by the current page flow, a floating fill button on the form page.
-
-### Step 3 — Review unmatched questions
-
-Questions that could not be matched can be added from the popup under **Needs your answer**.
-
-This creates a useful learning loop:
-
-```text
-New question
-    ↓
-No match
-    ↓
-Add answer once
-    ↓
-Save locally
-    ↓
-Reuse next time
-```
-
-### Step 4 — Review before submitting
-
-FormFlash fills fields but **does not submit the form automatically**.
-
-Always review the populated answers before pressing the form's own Submit button.
-
----
-
-## Matching Rules
-
-FormFlash uses keyword-based matching rather than blindly mapping every question to an answer.
-
-### Normal keyword matching
-
-```text
-Keyword: email
-```
-
-Can match questions such as:
-
-```text
-Email
-Email address
-College email address
-```
-
-### Exact matching
-
-Prefix a keyword with `=` when the whole normalized question should match that value.
-
-```text
-=name
-```
-
-This is intended to match:
-
-```text
-Name
-```
-
-without treating it as a generic match for questions such as:
-
-```text
-Father's Name
-Mother's Name
-Full Name
-```
-
-### Checkboxes
-
-For multiple checkbox values, enter comma-separated answers:
-
-```text
-Java, Python
-```
-
-### Existing values are preserved
-
-FormFlash avoids overwriting fields that are already populated by the user.
-
-### Multi-page forms
-
-For multi-page forms, you may need to run the fill action again after moving to a new page.
-
----
-
-## Current Architecture
-
-FormFlash is currently a Manifest V3 browser extension with four main parts:
-
-```text
-                  ┌──────────────────────┐
-                  │      Popup UI        │
-                  │ popup.html/css/js    │
-                  └──────────┬───────────┘
-                             │
-                             ▼
-                  ┌──────────────────────┐
-                  │  chrome.storage.local│
-                  │   Saved answers      │
-                  └──────────┬───────────┘
-                             │
-                             ▼
-                  ┌──────────────────────┐
-                  │     content.js       │
-                  │  Form page runtime   │
-                  └──────────┬───────────┘
-                             │
-                    ┌────────┴────────┐
-                    ▼                 ▼
-             Google Forms      Microsoft Forms
-                    │                 │
-                    └────────┬────────┘
-                             ▼
-                    Question matching
-                             │
-                             ▼
-                       Field filling
-```
-
-### Current repository files
-
-```text
-formflash/
-├── manifest.json     # Chrome Manifest V3 configuration
-├── content.js        # Form detection, matching, filling and page-side UI
-├── popup.html        # Extension popup markup
-├── popup.css         # Popup styling
-├── popup.js          # Saved answers, import/export and popup behavior
-├── icons/             # Extension icons
-└── README.md          # Project documentation
-```
-
-The project is intentionally lightweight and currently does not require a backend or build server to load the extension locally.
-
----
+- Answers are stored locally with `chrome.storage.local`. There is no account and no server.
+- The extension makes no network requests.
+- Local storage is not encrypted, so treat it like anything else in your browser profile.
+- When you submit a form, the form provider receives whatever you submit, as usual.
 
 ## Development
 
-### Requirements
+No build step and no dependencies. Load the folder as an unpacked extension and reload it
+after edits.
 
-- Google Chrome or another Chromium-based browser with extension support
-- Git
-- A code editor
-
-### Local development
-
-Clone the repository:
+Matching and input formatting live in `lib/matcher.js`. That file has no DOM access, so the
+tests run in plain Node:
 
 ```bash
-git clone https://github.com/<your-username>/formflash.git
-cd formflash
+npm test
 ```
 
-Load the project as an unpacked extension from:
+`tests/popup-preview.html` renders the popup in a normal tab with the extension APIs stubbed
+out, which is handy for UI work:
 
-```text
-chrome://extensions
+```bash
+python3 -m http.server 8765 --bind 127.0.0.1
+# then open http://127.0.0.1:8765/tests/popup-preview.html
 ```
 
-After changing extension files, use the **Reload** button on the extension card and refresh the form page.
+## Files
 
-### Recommended development loop
-
-```text
-Change code
-    ↓
-Reload extension
-    ↓
-Refresh form
-    ↓
-Test fill behavior
-    ↓
-Check console
-    ↓
-Update tests/docs
+```
+manifest.json      extension config (MV3)
+background.js      keyboard shortcut -> fill request
+content.js         runs on form pages: finds questions, matches, fills
+lib/matcher.js     keyword matching and input formatting (shared, tested)
+popup.html/css/js  the toolbar UI
+tests/             unit tests and the popup preview
+icons/             toolbar and store icons
 ```
 
----
+## License
 
-## Testing Strategy
-
-As FormFlash evolves into a larger open-source project, the project should keep provider behavior and matching logic independently testable.
-
-Priority areas:
-
-```text
-Core matching
-    ↓
-Option matching
-    ↓
-Question detection
-    ↓
-Google Forms controls
-    ↓
-Microsoft Forms controls
-    ↓
-Storage/import/export
-    ↓
-End-to-end browser behavior
-```
-
-When reporting a bug, include the provider, control type, question pattern, expected behavior, and actual behavior. Never include real personal information in issues or pull requests.
-
----
-
-## Contributing
-
-FormFlash is intended to be an open-source, community-driven project.
-
-Contributions are welcome in areas such as:
-
-- Improving question matching
-- Fixing Google Forms compatibility
-- Fixing Microsoft Forms compatibility
-- Adding better support for form controls
-- Improving accessibility
-- Improving the popup UX
-- Adding automated tests
-- Improving documentation
-- Adding browser/provider compatibility
-
-### Contribution flow
-
-```text
-Fork
-  ↓
-Create a feature/fix branch
-  ↓
-Make your change
-  ↓
-Test locally
-  ↓
-Update documentation/tests
-  ↓
-Open a Pull Request
-  ↓
-Review
-  ↓
-Merge
-```
-
-Good branch examples:
-
-```text
-feat/profile-support
-fix/google-checkbox
-fix/microsoft-dropdown
-test/matcher-cases
-docs/installation-guide
-refactor/provider-detection
-```
-
-For the full contribution process, see `CONTRIBUTING.md` once the contributor guide is added to the repository.
-
----
-
-## Reporting Bugs
-
-Before opening an issue:
-
-1. Check whether the problem is already reported.
-2. Confirm that you are using a supported form provider.
-3. Reload the extension and reproduce the problem.
-4. Remove all real personal information from screenshots and examples.
-
-A useful bug report includes:
-
-```text
-Provider:
-Browser:
-Question type:
-Expected behavior:
-Actual behavior:
-Steps to reproduce:
-Console errors (if relevant):
-```
-
-For security vulnerabilities, do not publish sensitive details in a public GitHub issue. Use the project's private security-reporting process once `SECURITY.md` is configured.
-
----
-
-## Roadmap
-
-### Phase 1 — Reliable core
-
-- [ ] Extract matching logic into independently testable modules
-- [ ] Add provider-specific modules
-- [ ] Add matcher unit tests
-- [ ] Add DOM fixtures for supported controls
-- [ ] Add storage schema/versioning
-- [ ] Improve error and unmatched-question reporting
-
-### Phase 2 — Better UX
-
-- [ ] Multiple answer profiles
-- [ ] Profile switching
-- [ ] Better onboarding
-- [ ] Bulk answer management
-- [ ] Accessibility improvements
-
-### Phase 3 — Ecosystem
-
-- [ ] Broader browser support
-- [ ] More form providers
-- [ ] Public compatibility documentation
-- [ ] Community discussions
-- [ ] Chrome Web Store release
-
-> The roadmap is directional. Issues and community contributions can change priorities as the project grows.
-
----
-
-## Security Principles
-
-FormFlash handles user-provided answers, so security and privacy are core engineering concerns.
-
-The project aims to follow these principles:
-
-- Store reusable answers locally by default
-- Avoid unnecessary network communication
-- Keep extension permissions minimal
-- Never auto-submit forms
-- Never commit real user data to the repository
-- Review changes that affect storage, permissions, or form-page access carefully
-
-If you discover a security issue, please report it privately rather than posting exploit details publicly.
-
----
-
-## Current Permissions
-
-The extension currently requests:
-
-| Permission | Purpose |
-|---|---|
-| `storage` | Store saved answers locally in browser extension storage |
-| `activeTab` | Support user-triggered actions on the active tab |
-| `scripting` | Support script execution required by the extension's current behavior |
-
-Permissions should be kept minimal. Any future permission change should be documented and justified in the relevant pull request.
-
----
-
-## Design Principles
-
-FormFlash follows a few simple rules:
-
-> **Local first.**
-
-Saved answers should stay on the user's device whenever possible.
-
-> **Explicit user action.**
-
-Filling should happen because the user asked FormFlash to fill the form.
-
-> **Never silently submit.**
-
-The user should review the completed form before submission.
-
-> **Prefer precision over aggressive matching.**
-
-A missed field is better than silently filling the wrong answer.
-
-> **Open source by default.**
-
-The architecture, behavior, privacy model, and contribution process should remain understandable and reviewable by the community.
-
----
-
-## Project Status
-
-FormFlash is an actively developed project. Google Forms and Microsoft Forms DOM structures can change independently of this project, so compatibility may evolve over time.
-
-The repository is being structured for open-source contributions, automated testing, provider-specific compatibility work, and community-driven improvements.
-
----
-
-## Community
-
-If FormFlash is useful to you, the most valuable ways to support the project are:
-
-- Report reproducible bugs
-- Improve documentation
-- Add tests
-- Fix provider compatibility issues
-- Contribute new features through pull requests
-
-Please avoid sharing real personal form data in public issues, pull requests, screenshots, fixtures, or examples.
-
----
-
-##  License
-
-The project's license should be added to the repository before the first public release. See the repository's `LICENSE` file for the final terms.
-
----
-
-**FormFlash — save once, fill faster, stay in control.**
+No license has been chosen yet. Ask before reusing the code.
