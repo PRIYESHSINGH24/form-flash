@@ -1,0 +1,39 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Mock Google Form</title>
+<style>
+  body { margin:0; background:#f0ebf8; font-family: Roboto, Arial, sans-serif; }
+  .wrap { max-width: 640px; margin: 24px auto; }
+  [role=listitem] { background:#fff; border:1px solid #dadce0; border-radius:8px; padding:22px 24px; margin-bottom:12px; }
+  [role=heading] { font-size:16px; margin-bottom:12px; }
+  input[type=text], textarea { width:100%; border:0; border-bottom:1px solid #ccc; padding:6px 0; font-size:14px; }
+  [role=radio], [role=checkbox] { display:block; padding:6px 0; cursor:pointer; }
+  [role=radio]::before { content:'○ '; } [role=radio][aria-checked=true]::before { content:'● '; }
+  [role=checkbox]::before { content:'☐ '; } [role=checkbox][aria-checked=true]::before { content:'☑ '; }
+  button#next { background:#673ab7; color:#fff; border:0; padding:10px 24px; border-radius:4px; }
+</style></head>
+<body><div class="wrap" id="wrap"></div>
+<script>
+  function q(title, inner) { return '<div role="listitem"><div role="heading">' + title + '</div>' + inner + '</div>'; }
+  const radio = (opts) => '<div role="radiogroup">' + opts.map(o => `<div role="radio" data-value="${o}" aria-checked="false" tabindex="0">${o}</div>`).join('') + '</div>';
+  const checks = (opts) => opts.map(o => `<div role="checkbox" data-value="${o}" aria-checked="false" tabindex="0">${o}</div>`).join('');
+  const section1 = () =>
+    q('Full name <span>*</span>', '<input type="text" aria-label="Full name">') +
+    q('Email address', '<input type="text" aria-label="Email address">') +
+    q('What is your favourite programming language?', '<input type="text" aria-label="fav lang">') +
+    q('Preferred role', radio(['SDE', 'Data Engineer', 'DevOps'])) +
+    q('Which of these do you know?', checks(['Java', 'Python', 'Go'])) +
+    q('Hometown', '<input type="text" aria-label="Hometown">') +
+    q('Tell us about yourself', '<textarea aria-label="about" rows="2"></textarea>') +
+    '<button id="next">Next</button>';
+  const section2 = () =>
+    q('Why do you want to join us?', '<textarea aria-label="why" rows="2"></textarea>') +
+    q('Expected graduation year', '<input type="text" aria-label="year">');
+  document.getElementById('wrap').innerHTML = section1();
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('[role=radio]');
+    if (t) { t.parentElement.querySelectorAll('[role=radio]').forEach(r => r.setAttribute('aria-checked', 'false')); t.setAttribute('aria-checked', 'true'); }
+    const c = e.target.closest('[role=checkbox]');
+    if (c) c.setAttribute('aria-checked', c.getAttribute('aria-checked') === 'true' ? 'false' : 'true');
+    if (e.target.id === 'next') document.getElementById('wrap').innerHTML = section2();
+  });
+</script></body></html>

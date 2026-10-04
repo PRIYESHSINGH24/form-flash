@@ -1,0 +1,10 @@
+{
+  "name": "form-flash",
+  "version": "1.3.0",
+  "private": true,
+  "description": "Chrome extension that fills Google Forms and Microsoft Forms from saved answers.",
+  "scripts": {
+    "test": "node --test",
+    "e2e": "node tests/e2e/run.cjs && node tests/e2e/popup.cjs"
+  }
+}
